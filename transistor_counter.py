@@ -13,11 +13,13 @@ class module:
 
 def getModName(full_text):
     return ""
+    # TODO
 
     
 def getTransCount(full_text):
     return 0
 
+    # TODO
 
 
 
