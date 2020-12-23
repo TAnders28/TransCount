@@ -11,6 +11,14 @@ class module:
         self.trans_count = count
 
 
+def getModName(full_text):
+    return ""
+
+    
+def getTransCount(full_text):
+    return 0
+
+
 
 
 def __main__():
@@ -52,10 +60,12 @@ def __main__():
     
 
     for mod in modules:
-       
-        
+        name = getModName(mod)
+        transCount = getTransCount(mod)
+
         print(mod)
         print("///////////////////////////////////////////////////\n")
+        
     
 
 
