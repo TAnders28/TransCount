@@ -11,12 +11,16 @@ class module:
         self.trans_count = count
 
 
-def getModName(full_text):
-    return ""
-    # TODO
+def getModName(mod_text):
+    split_text = mod_text.splitlines()
+    first_line = split_text[0]
+    split_line = first_line.split('(')
+    first_split = split_line[0]
+    space_split = first_split.split(' ')
+    return space_split[1]
 
     
-def getTransCount(full_text):
+def getTransCount(mod_text):
     return 0
 
     # TODO
@@ -45,11 +49,10 @@ def __main__():
         while (line[0] == " "):
             line = line[1:]
         # Skip lines with comments only 
-        while (line[0] == "/" and line[1] == "/"):
+        while (line[0] == "/" and line[1] == "/"): 
             line = file.readline()
         
         # Identify modules
-        
         if (line[0:6] == "module"):
             current_mod = line
             line = file.readline().strip()
@@ -76,8 +79,8 @@ def __main__():
         name = getModName(mod)
         transCount = getTransCount(mod)
 
-        print(mod)
-        print("///////////////////////////////////////////////////\n")
+        print(name)
+        print("\n///////////////////////////////////////////////////\n")
         
     
 
