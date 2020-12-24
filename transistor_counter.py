@@ -35,7 +35,7 @@ def __main__():
     }
 
     line = file.readline()
-    
+    line = line.strip()
     modules = set()
         
     # This is looped until the end of the file is reached. 
@@ -49,11 +49,12 @@ def __main__():
             line = file.readline()
         
         # Identify modules
-
-        current_mod = ""
+        
         if (line[0:6] == "module"):
+            current_mod = line
+            line = file.readline().strip()
+            # Until module ends
             while (line[0:9] != "endmodule"):
-                line = line.strip()
                 if not line: 
                     pass
                 elif (line[0] == "/" and line[1] == "/"):
@@ -62,8 +63,10 @@ def __main__():
                     current_mod = current_mod + line + "\n"
 
                 line = file.readline()
-        current_mod = current_mod + "endmodule\n"
-        modules.add(current_mod)
+                line = line.strip()
+            # current_mod = current_mod.replace(" ", "")
+            current_mod = current_mod + "endmodule\n"
+            modules.add(current_mod)
 
         line = file.readline()
         
