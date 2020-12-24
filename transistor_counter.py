@@ -53,8 +53,16 @@ def __main__():
         current_mod = ""
         if (line[0:6] == "module"):
             while (line[0:9] != "endmodule"):
-                current_mod = current_mod + line.strip() + "\n"
+                line = line.strip()
+                if not line: 
+                    pass
+                elif (line[0] == "/" and line[1] == "/"):
+                    pass
+                else:
+                    current_mod = current_mod + line + "\n"
+
                 line = file.readline()
+        current_mod = current_mod + "endmodule\n"
         modules.add(current_mod)
 
         line = file.readline()
