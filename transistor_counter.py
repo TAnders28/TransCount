@@ -1,5 +1,6 @@
 class module: 
-    def __init__(self, mod_text):
+    def __init__(self, text):
+        mod_text = combine_lines(text)
         self.name = getModName(mod_text)
         self.trans_count= getModTransCount(mod_text)
         self.inputs = getModInputs(mod_text)
@@ -21,10 +22,28 @@ class module:
         self.trans_count = count
         
     
+    
+def combine_lines(text):
+    combined_lines = []
+    current = ''
+    setPass = False
+    for i in text:
+        if (i == "\n"):
+            setPass = False
+        if (i == "/"):
+            setPass = True
+        if (setPass):
+            continue
+        current = current + i
+        if (i == ';'):
+            combined_lines.append(current.strip().replace('\n', ' '))
+            current = ''
+    return combined_lines
+
 def getModTransCount(text):
 
     transCount = 0
-    for line in text.splitlines()[1:-1]:
+    for line in text[1:-1]:
         transCount = transCount + countTransistorsInLine(line)
     return transCount
     # TODO
@@ -44,7 +63,7 @@ def countTransistorsInLine(line):
         return 1
     
 def getModName(text):
-    split_text = text.splitlines()
+    split_text = text
     first_line = split_text[0]
     split_line = first_line.split('(')
     first_split = split_line[0]
@@ -53,35 +72,37 @@ def getModName(text):
 
 def getModInputs(text):
     inputs = []
-    for line in text.splitlines()[1:-1]:
+    for line in text[1:-1]:
         if (line[0:5] == 'input'):
             inputs.append(line.strip())
     return inputs
 
 def getModOutputs(text):
     outputs = []
-    for line in text.splitlines()[1:-1]:
+    for line in text[1:-1]:
         if (line[0:6] == 'output'):
+            
             outputs.append(line.strip())
     return outputs
 
 def getModWires(text):
     wires = []
-    for line in text.splitlines()[1:-1]:
+    current = ""
+    for line in text[1:-1]:
         if (line[0:4] == 'wire'):
-            wires.append(line.strip())
+            wires.append(line)
     return wires
 
 def getModAssigns(text): 
     assigns = []
-    for line in text.splitlines()[1:-1]:
+    for line in text[1:-1]:
         if (line[0:6] == 'assign'):
             assigns.append(line.strip())
     return assigns
 
 def getModInnerModules(text):
     modules = []
-    for line in text.splitlines()[1:-1]:
+    for line in text[1:-1]:
         if (line[0:5] == 'input'):
             pass
         elif (line[0:6] == 'output'):
@@ -93,7 +114,7 @@ def getModInnerModules(text):
         else: 
             modules.append(line.strip())
     return modules
-
+    
 def parseInputFile(filename):
     
     file = open(filename, "r")
@@ -104,7 +125,7 @@ def parseInputFile(filename):
     # This is looped until the end of the file is reached. 
     while (line is not "") : 
 
-        line = line.strip()
+        line = line.split("/")[0]
 
         # Skip lines with comments only 
         if (not line or not line[1]):
@@ -115,7 +136,7 @@ def parseInputFile(filename):
         # Identify modules
         if (line[0:6] == "module"):
             current_mod = line + "\n"
-            line = file.readline().strip()
+            line = file.readline().strip().split('/')[0]
             # Until module ends
             while (line[0:9] != "endmodule"):
                 if not line: 
@@ -125,7 +146,7 @@ def parseInputFile(filename):
                 else:
                     current_mod = current_mod + line + "\n"
 
-                line = file.readline().strip()
+                line = file.readline().strip().split('/')[0]
             current_mod = current_mod + "endmodule\n"
             modules.add(current_mod)
 
