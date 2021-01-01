@@ -1,5 +1,5 @@
 import queue
-
+from collections import Counter
 
 """
 Class representing a single verilog module with interior attributes representing:
@@ -42,17 +42,17 @@ class module:
         wire_string = ""
         for w in self.wires:
             wire_string += w[0] + " : width " + str(w[1]) + "\n"
-        
         wire_string += "\n"
 
         assign_string = "\n"
         for a in self.assigns:
             assign_string += a + "\n"
-
         assign_string += "\n"
+
         module_string = "\n"
-        for m in self.modules:
-            module_string += m[0] + ": " + str(m[1]) + " inputs\n"
+
+        for val, count in dict(Counter(self.modules)).items():
+            module_string += str(count) + "x " + val[0] + "\n"
         module_string += "\n"
 
         string = "\n//////////////////////\nModule name: " + self.name + "\nTransistor count: " + str(self.trans_count)
@@ -163,6 +163,7 @@ def getModInputs(text):
         if (line[0:5] == 'input'):
             inputs.append(line.strip())
     return inputs
+
 """
 Parses inputs
 """
@@ -299,7 +300,7 @@ def format(text):
 
 
 """
-Shows a formatted version of attributes
+
 """
 def parseInputFile(filename):
     
@@ -341,7 +342,7 @@ def parseInputFile(filename):
         
 
 """
-Shows a formatted version of attributes
+
 """
 def __main__():
     filename = input("Input the name of the .v file you wish to analyze: ")
