@@ -12,19 +12,10 @@ class module:
     """
     def __init__(self, text):
         mod_text = combine_lines(text)
-
+        self.name = getParseModName(mod_text[0])
+        self.inputs, self.outputs, self.wires, self.modules, self.assigns = getModParts(mod_text)
         self.trans_count = -1
 
-        self.name = getParseModName(mod_text[0]) # PARSE IMPLEMENTED
-        self.inputs, self.outputs, self.wires, self.modules, self.assigns = getModParts(mod_text)
-
-    def parse(self):
-        self.inputs = parseModInputs(self.inputs)
-        self.outputs = parseModOutputs(self.outputs)
-        self.wires = parseModWires(self.wires)
-        self.modules = parseModInnerModules(self.modules)
-        self.assigns = parseModAssigns(self.assigns)
-    
     
     """
     Calculates transistor count based on interior characteristics
@@ -58,15 +49,15 @@ class module:
     Shows a formatted version of inner attributes
     """
     def __str__(self):
-        input_string = ""
+        input_string = "\n"
         for i in self.inputs:
             input_string += i[0] + " : width " + str(i[1]) + "\n"
   
-        output_string = ""
+        output_string = "\n"
         for o in self.outputs:
             output_string += o[0] + " : width " + str(o[1]) + "\n"
 
-        wire_string = ""
+        wire_string = "\n"
         for w in self.wires:
             wire_string += w[0] + " : width " + str(w[1]) + "\n"
 
@@ -79,7 +70,7 @@ class module:
             module_string += str(count) + "x " + val[0] + "\n"
 
         string = "\n//////////////////////\nModule name: " + self.name + "\nTransistor count: " + str(self.trans_count)
-        string = string + "\nInputs:\n" + input_string + "\nOutputs:\n" + output_string
+        string = string + "\n\n-----------------\n\nInputs:\n" + input_string + "\nOutputs:\n" + output_string
         string = string + "\nWires:\n" + wire_string + "\nAssigns:\n" + assign_string + "\nModules:\n" + module_string
         
         return string
@@ -146,10 +137,7 @@ known_input_independent = {
     }
     
 #
-known_modules = {
-
-}
-    
+known_modules = {}
 
     
 """
@@ -178,10 +166,10 @@ def combine_lines(text):
 Gets lines with declared inner modules from a module string
 """
 def getModParts(text):
-    modules = []
     inputs = []
     outputs = [] 
     wires = []
+    modules = []
     assigns = []
     for line in text[1:]:
         if (line[0:5] == 'input'):
@@ -194,7 +182,8 @@ def getModParts(text):
             assigns.append(line)
         else: 
             modules.append(line.strip())
-    return (inputs, outputs, wires, modules, assigns)
+    result = (parseModInputs(inputs), parseModOutputs(outputs), parseModWires(wires), parseModInnerModules(modules), parseModAssigns(assigns))
+    return result
 
 """
 Gets and parses for the module name given a preformatted list of strings
@@ -204,16 +193,6 @@ def getParseModName(first_line):
     first_split = split_line[0]
     space_split = first_split.split(' ')
     return space_split[1].strip()
-
-"""
-Gets the lines with inputs from a module string
-"""
-def getModInputs(text):
-    inputs = []
-    for line in text[1:]:
-        if (line[0:5] == 'input'):
-            inputs.append(line.strip())
-    return inputs
 
 """
 Parses inputs
@@ -233,15 +212,7 @@ def parseModInputs(text):
             inputs.append(parsed)
     return inputs
 
-"""
-Gets the lines with outputs from a module string
-"""
-def getModOutputs(text):
-    outputs = []
-    for line in text[1:]:
-        if (line[0:6] == 'output'):
-            outputs.append(line.strip())
-    return outputs
+
 """
 Parses outputs
 """
@@ -261,15 +232,7 @@ def parseModOutputs(text):
     return outputs
 
 
-"""
-Gets the lines with wires from a module string
-"""
-def getModWires(text):
-    wires = []
-    for line in text[1:]:
-        if (line[0:4] == 'wire'):
-            wires.append(line)
-    return wires
+
 
 """
 Parses wires
@@ -290,15 +253,6 @@ def parseModWires(text):
             wires.append(parsed)
     return wires
 
-"""
-Gets the lines with assign statements from a module string
-"""
-def getModAssigns(text): 
-    assigns = []
-    for line in text[1:]:
-        if (line[0:6] == 'assign'):
-            assigns.append(line.strip())
-    return assigns
 
 """
 Parses assign statements 
@@ -325,23 +279,6 @@ def parseModAssigns(text):
         assigns.append((left, statement_total))
     return assigns
 
-"""
-Gets lines with declared inner modules from a module string
-"""
-def getModInnerModules(text):
-    modules = []
-    for line in text[1:]:
-        if (line[0:5] == 'input'):
-            pass
-        elif (line[0:6] == 'output'):
-            pass
-        elif (line[0:4] == 'wire'):
-            pass
-        elif (line[0:6] == 'assign'):
-            pass
-        else: 
-            modules.append(line.strip())
-    return modules
 
 """
 Parses inner modules
@@ -383,13 +320,12 @@ def convert(line):
         return original_value
     else:
         pass
-    # Unimplemented
 
 
 
 
 """
-
+Extract a list of individual modules from a verilog file.
 """
 def parseInputFile(filename):
     
@@ -431,7 +367,7 @@ def parseInputFile(filename):
         
 
 """
-
+Main function
 """
 def __main__():
     filename = input("Input the name of the .v file you wish to analyze: ")
@@ -442,7 +378,6 @@ def __main__():
     parsed_modules = set()
     for mod in modules:
         current_mod = module(mod)
-        current_mod.parse()
         parsed_modules.add(current_mod)
 
 
@@ -481,7 +416,7 @@ def __main__():
     
 
 """
-Shows a formatted version of attributes
+Runs main function
 """
 if __name__ == "__main__":
     __main__()
