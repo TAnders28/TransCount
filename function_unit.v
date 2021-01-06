@@ -185,7 +185,7 @@ module add_16bit(out, status, op1, op2);
 	xor(status[3], carry_out, last_carry_in);
 	assign status[2] = carry_out;
 	assign status[1] = out[15];
-   assign status[0] = (out == 4'h0000) ? 1'b1: 1'b0;
+    assign status[0] = (out == 4'h0000) ? 1'b1: 1'b0;
 endmodule 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

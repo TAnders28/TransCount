@@ -452,6 +452,7 @@ module dec3A(result,A,status);
 	output [15:0] result;
 	
 	sub Aneg3(result,A,3,status);
+	
 endmodule 
 
 

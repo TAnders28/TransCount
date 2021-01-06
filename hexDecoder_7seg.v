@@ -6,7 +6,7 @@
 //              Assumes common anode segments; used for DE10-Lite board
 //
 //	Created by Addison Ferrari, July 2019
-// Modified by J.S. Thweatt, October 2019
+//  Modified by J.S. Thweatt, October 2019
 //
 //
 //	***************************
@@ -24,7 +24,7 @@ module hexDecoder_7seg(sevenSegUpper, sevenSegLower, value);
 	assign upper = value[7:4];
 	assign lower = value[3:0];
 	
-	assign sevenSegUpper =  (upper == 4'h0) ? 7'h40 :
+	assign sevenSegUpper = (upper == 4'h0) ? 7'h40 :
                            (upper == 4'h1) ? 7'h79 :
    								(upper == 4'h2) ? 7'h24 :
    								(upper == 4'h3) ? 7'h30 :

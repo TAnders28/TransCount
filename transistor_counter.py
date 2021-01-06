@@ -1,4 +1,4 @@
-import queue
+import queue, math
 from collections import Counter
 
 """
@@ -12,77 +12,24 @@ class module:
     """
     def __init__(self, text):
         mod_text = combine_lines(text)
-        first_line = mod_text[0]
 
         self.trans_count = -1
 
-        self.name = getParseModName(first_line) # PARSE IMPLEMENTED
-        self.inputs = parseModInputs(getModInputs(mod_text)) # PARSE IMPLEMENTED 
-        self.outputs = parseModOutputs(getModOutputs(mod_text)) # PARSE IMPLEMENTED
-        self.wires =  parseModWires(getModWires(mod_text)) # PARSE IMPLEMENTED
-        self.modules = parseModInnerModules(getModInnerModules(mod_text)) # PARSE IMPLEMENTED
-        self.assigns = getModAssigns(mod_text) #!! PARSE UNIMPLEMENTED
+        self.name = getParseModName(mod_text[0]) # PARSE IMPLEMENTED
+        self.inputs, self.outputs, self.wires, self.modules, self.assigns = getModParts(mod_text)
 
-    """
-    Shows a formatted version of inner attributes
-    """
-    def __str__(self):
-        input_string = ""
-        for i in self.inputs:
-            input_string += i[0] + " : width " + str(i[1]) + "\n"
-
-        input_string += "\n"
-            
-        output_string = ""
-        for o in self.outputs:
-            output_string += o[0] + " : width " + str(o[1]) + "\n"
-
-        output_string += "\n"
-        
-        wire_string = ""
-        for w in self.wires:
-            wire_string += w[0] + " : width " + str(w[1]) + "\n"
-        wire_string += "\n"
-
-        assign_string = "\n"
-        for a in self.assigns:
-            assign_string += a + "\n"
-        assign_string += "\n"
-
-        module_string = "\n"
-
-        for val, count in dict(Counter(self.modules)).items():
-            module_string += str(count) + "x " + val[0] + "\n"
-        module_string += "\n"
-
-        string = "\n//////////////////////\nModule name: " + self.name + "\nTransistor count: " + str(self.trans_count)
-        string = string + "\nInputs:\n" + input_string + "\nOutputs:\n" + output_string
-        string = string + "\nWires:\n" + wire_string + "\nAssigns:\n" + assign_string + "\nModules:\n" + module_string
-        
-        return string
-    """
-    Getter: 
-    Return string representing name
-    """
-    def getName(self):
-        return self.name
+    def parse(self):
+        self.inputs = parseModInputs(self.inputs)
+        self.outputs = parseModOutputs(self.outputs)
+        self.wires = parseModWires(self.wires)
+        self.modules = parseModInnerModules(self.modules)
+        self.assigns = parseModAssigns(self.assigns)
     
-    """
-    Getter:
-    Return list of tuples in the format:
-    (module, input_count)
-    representing the interior modules of this module
-    """
-    def getModules(self):
-        return self.modules
-
+    
     """
     Calculates transistor count based on interior characteristics
     """
     def findTransCount(self):
-        print("\n//////////////////////\n" + "Analysis of " + self.name)
-        print("\nModules: " + str(list(enumerate(self.modules, 1))) + "\n")
-
         current_count = 0
         error_count = 0
         module_count = 1
@@ -102,8 +49,86 @@ class module:
                 error_count += 1
             module_count += 1
 
+        for assign in self.assigns:
+            current_count += assign[1]
         self.trans_count = current_count
         known_modules.update({self.name : current_count})
+        
+    """
+    Shows a formatted version of inner attributes
+    """
+    def __str__(self):
+        input_string = ""
+        for i in self.inputs:
+            input_string += i[0] + " : width " + str(i[1]) + "\n"
+  
+        output_string = ""
+        for o in self.outputs:
+            output_string += o[0] + " : width " + str(o[1]) + "\n"
+
+        wire_string = ""
+        for w in self.wires:
+            wire_string += w[0] + " : width " + str(w[1]) + "\n"
+
+        assign_string = "\n"
+        for a in self.assigns:
+            assign_string += a[0] + " : " + str(a[1]) + " transistors\n"
+
+        module_string = "\n"
+        for val, count in dict(Counter(self.modules)).items():
+            module_string += str(count) + "x " + val[0] + "\n"
+
+        string = "\n//////////////////////\nModule name: " + self.name + "\nTransistor count: " + str(self.trans_count)
+        string = string + "\nInputs:\n" + input_string + "\nOutputs:\n" + output_string
+        string = string + "\nWires:\n" + wire_string + "\nAssigns:\n" + assign_string + "\nModules:\n" + module_string
+        
+        return string
+
+    """
+    Getter: 
+    Return string representing name
+    """
+    def getName(self):
+        return self.name
+
+    """
+    Getter:
+    Return list of inputs with widths
+    """
+    def getInputs(self):
+        return self.inputs
+
+    """
+    Getter:
+    Return list of outputs with widths
+    """
+    def getOutputs(self):
+        return self.outputs
+
+    """
+    Getter:
+    Return list of wires with widths
+    """
+    def getWires(self):
+        return self.outputs
+
+    """
+    Getter:
+    Return list of tuples in the format:
+    (module, input_count)
+    representing the interior modules of this module
+    """
+    def getModules(self):
+        return self.modules
+
+    """
+    Getter:
+    Return list of tuples in the format:
+    (assign, transistor count)
+    representing the interior modules of this module
+    """
+    def getAssigns(self):
+        return self.assigns
 
 #
 known_input_dependent = {
@@ -121,7 +146,11 @@ known_input_independent = {
     }
     
 #
-known_modules = {}
+known_modules = {
+
+}
+    
+
     
 """
 Method that combines and formats the lines of a verilog file, which 
@@ -144,6 +173,28 @@ def combine_lines(text):
             combined_lines.append(current.strip().replace('\n', ' '))
             current = ''
     return combined_lines
+
+"""
+Gets lines with declared inner modules from a module string
+"""
+def getModParts(text):
+    modules = []
+    inputs = []
+    outputs = [] 
+    wires = []
+    assigns = []
+    for line in text[1:]:
+        if (line[0:5] == 'input'):
+            inputs.append(line)
+        elif (line[0:6] == 'output'):
+            outputs.append(line)
+        elif (line[0:4] == 'wire'):
+            wires.append(line)
+        elif (line[0:6] == 'assign'):
+            assigns.append(line)
+        else: 
+            modules.append(line.strip())
+    return (inputs, outputs, wires, modules, assigns)
 
 """
 Gets and parses for the module name given a preformatted list of strings
@@ -182,9 +233,6 @@ def parseModInputs(text):
             inputs.append(parsed)
     return inputs
 
-
-
-
 """
 Gets the lines with outputs from a module string
 """
@@ -222,20 +270,21 @@ def getModWires(text):
         if (line[0:4] == 'wire'):
             wires.append(line)
     return wires
+
 """
 Parses wires
 """
 def parseModWires(text):
     wires = []
     for wire in text:
-        
         if ('[' and ']' in wire):
             range = wire.split('[')[1].split(']')[0]
             length = int(range.split(':')[0]) - int(range.split(':')[1]) + 1
             names = wire.split(']')[1].split(',')
         else: 
             length = 1
-            names = wire.split('wire ')[1].split(',')
+            names = wire.split('wire ')[1]
+            names = names.split(',')
         for name in names:
             parsed = (format(name),length)
             wires.append(parsed)
@@ -255,8 +304,26 @@ def getModAssigns(text):
 Parses assign statements 
 """
 def parseModAssigns(text):
-    pass
-
+    assigns = []
+    for line in text:
+        
+        left = line.split(' = ')[0]
+        right = line.split(' = ')[1]
+        individual_parts = right.split(': ')
+        if (len(individual_parts) == 1):
+            assigns.append((left, 0))
+            continue
+        default = individual_parts[-1]
+        statement_total = 0
+        for part in individual_parts[:-1]:
+            parts = part.split(' ? ')
+            result = convert(parts[1].strip())
+            condition = convert(parts[0].split("== ")[1].split(")")[0].strip())
+            condition_trans_count = known_input_dependent.get("and")[1] * len(condition) + known_input_dependent.get("and")[0]
+            result_trans_count = known_input_independent.get("bufif1") * len(result)
+            statement_total += condition_trans_count + result_trans_count
+        assigns.append((left, statement_total))
+    return assigns
 
 """
 Gets lines with declared inner modules from a module string
@@ -296,6 +363,28 @@ Removes extra ';' and ',' characters
 def format(text):
     new = text.replace(';','').replace(',','').strip()
     return new
+
+
+"""
+Converts hexadecimal/octal/binary to binary 
+"""
+def convert(line):
+    radix = line.split("'")[1][0]
+    original_value = line.split("'")[1][1:]
+    binary_length = line.split("'")[0][0]
+    
+    if (radix == "h"):
+        new_value = "{0:0{len}b}".format(int(original_value,16), len=binary_length)
+        return new_value
+    elif (radix == "o"):
+        new_value = "{0:0{len}b}".format(int(original_value,8), len=binary_length)
+        return new_value
+    elif (radix == "b"):
+        return original_value
+    else:
+        pass
+    # Unimplemented
+
 
 
 
@@ -353,13 +442,9 @@ def __main__():
     parsed_modules = set()
     for mod in modules:
         current_mod = module(mod)
-        # TEMPORARILY REMOVED FOR TESTING
-        # print(current_mod)
+        current_mod.parse()
         parsed_modules.add(current_mod)
 
-    #
-    for mod in parsed_modules:
-        print(mod)
 
     analyzed_modules = []
 
@@ -388,10 +473,11 @@ def __main__():
         #
         else: 
             parsed_modules.add(current)
-    #
+    #TEMPORARILY REMOVED
+    
     for mod in analyzed_modules:
         print(mod)
-        
+    
     
 
 """
