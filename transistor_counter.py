@@ -1,6 +1,5 @@
-import queue, math
+import queue, math, time, argparse
 from collections import Counter
-
 """
 Class representing a single verilog module with interior attributes representing:
 name, transistor count, inputs, outputs, wires, inner modules, and assign statements
@@ -369,11 +368,9 @@ def parseInputFile(filename):
 """
 Main function
 """
-def __main__():
-    filename = input("Input the name of the .v file you wish to analyze: ")
+def __main__(filename):
+
     modules = parseInputFile(filename)
-
-
    # Get all of the modules into a set
     parsed_modules = set()
     for mod in modules:
@@ -385,7 +382,6 @@ def __main__():
 
     #
     while (not len(parsed_modules) == 0):
-
         current = parsed_modules.pop()
         current_inner_modules = current.getModules()
         
@@ -397,7 +393,6 @@ def __main__():
         #
         for (name, _) in current_inner_modules:
             
-            #
             if name.strip() not in known:
                 ready = False
                 break
@@ -408,15 +403,20 @@ def __main__():
         #
         else: 
             parsed_modules.add(current)
-    #TEMPORARILY REMOVED
     
     for mod in analyzed_modules:
         print(mod)
     
     
-
 """
-Runs main function
+    Runs main function
 """
 if __name__ == "__main__":
-    __main__()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--f', default='function_unit.v',type=str,help='This is the file to be parsed')
+    args = parser.parse_args()
+
+    filename = str(args.f)  
+    start_time = time.time()
+    __main__(filename)
+    print("Runtime:  %s seconds ---" % (time.time() - start_time))
