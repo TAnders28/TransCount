@@ -11,3 +11,5 @@ python3 transistor_counter.py (optional filename)
 If a file is not specified, the default set in line 421 is used.
 
 This will print to console an in depth description of each module in the verilog file, including deduced transistor count, with the top level module printed last.
+
+Included are 2 test files: function_unit.v and test1.v
