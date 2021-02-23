@@ -15,7 +15,6 @@ class module:
         self.inputs, self.outputs, self.wires, self.modules, self.assigns = getModParts(mod_text)
         self.trans_count = -1
 
-    
     """
     Calculates transistor count based on interior characteristics
     """
@@ -66,7 +65,8 @@ class module:
 
         module_string = "\n"
         for val, count in dict(Counter(self.modules)).items():
-            module_string += str(count) + "x " + val[0] + "\n"
+
+            module_string += str(count) + "x " + val[0] +" - " + str(val[1]) + " input\n"
 
         string = "\n//////////////////////\nModule name: " + self.name + "\nTransistor count: " + str(self.trans_count)
         string = string + "\n\n-----------------\n\nInputs:\n" + input_string + "\nOutputs:\n" + output_string
@@ -119,6 +119,9 @@ class module:
     """
     def getAssigns(self):
         return self.assigns
+    
+    def getTransistors(self):
+        return self.trans_count
 
 #
 known_input_dependent = {
@@ -392,7 +395,6 @@ def __main__(filename):
         
         #
         for (name, _) in current_inner_modules:
-            
             if name.strip() not in known:
                 ready = False
                 break
@@ -406,6 +408,9 @@ def __main__(filename):
     
     for mod in analyzed_modules:
         print(mod)
+
+    
+    print("Top level module:", analyzed_modules[-1].getName(), "with", analyzed_modules[-1].getTransistors(), "transistors.")
     
     
 """
@@ -419,4 +424,4 @@ if __name__ == "__main__":
     filename = str(args.f)  
     start_time = time.time()
     __main__(filename)
-    print("Runtime:  %s seconds ---" % (time.time() - start_time))
+    print("Runtime: %s seconds " % (time.time() - start_time))
