@@ -1,5 +1,5 @@
 # TransCount
-Author: Tom Anders(tanders28@vt.edu) and Spencer Beery(sbeery3@vt.edu)
+Authors: Tom Anders(tanders28@vt.edu) and Spencer Beery(sbeery3@vt.edu)
 
 
 The transistor_counter.py python 3 file provides a means of analyzing Dataflow and Structural level verilog files for transistor count, along with verbose output describing the features contained in each module of the file. 
