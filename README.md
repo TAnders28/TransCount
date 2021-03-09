@@ -6,7 +6,7 @@ The transistor_counter.py python 3 file provides a means of analyzing Dataflow a
 
 Usage:
 
-python3 transistor_counter.py (optional) --f <filename>
+python3 transistor_counter.py (optional) --f=filename
 
 If a file is not specified, the default set in line 421 is used.
 
