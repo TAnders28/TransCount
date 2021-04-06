@@ -2,7 +2,7 @@
 Authors: Tom Anders(tanders28@vt.edu) and Spencer Beery(sbeery3@vt.edu)
 
 
-The transistor_counter.py python 3 file provides a means of analyzing Dataflow and Structural level verilog files for transistor count from the Linux CLI, producing with verbose output describing the features contained in each module of the file. 
+The transistor_counter.py python 3 file provides a means of analyzing Dataflow and Structural level verilog files for transistor count from the Linux CLI, producing verbose output describing the features contained in each module of the file. 
 
 Usage:
 
